@@ -19,6 +19,9 @@ app.get("/api/company/list", CompanyController.list);
 
 //ProductController
 app.post("/api/buy/create", ProductController.create);
+app.get("/api/buy/list", ProductController.list);
+app.put("/api/buy/update/:id", ProductController.update);
+app.delete("/api/buy/delete/:id", ProductController.remove);
 
 app.get("/", (req, res) => {
     res.send("Hello World!");
