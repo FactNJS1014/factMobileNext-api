@@ -27,6 +27,9 @@ app.delete("/api/buy/delete/:id", ProductController.remove);
 
 //SellController
 app.post("/api/sell/add", SellController.create);
+app.get("/api/sell/list", SellController.list);
+app.delete("/api/sell/delete/:id", SellController.remove);
+app.post("/api/sell/confirm", SellController.confirm);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

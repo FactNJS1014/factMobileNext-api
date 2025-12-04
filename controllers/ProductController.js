@@ -41,7 +41,7 @@ const ProductController = {
         },
         where: {
           status: {
-            not: "deleted",
+            notIn: ["deleted", "sold"],
           },
         },
       });
