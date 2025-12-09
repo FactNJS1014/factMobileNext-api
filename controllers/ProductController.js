@@ -1,6 +1,7 @@
 const { PrismaClient } = require("../generated/prisma");
 const dotenv = require("dotenv");
 const prisma = new PrismaClient();
+const XLSX = require("xlsx");
 
 dotenv.config();
 
@@ -35,6 +36,17 @@ const ProductController = {
   },
   list: async (req, res) => {
     try {
+      const page = req.params.page ?? 1;
+      const limit = 5;
+      const skip = (page - 1) * limit;
+      const total = await prisma.product.count({
+        where: {
+          status: {
+            notIn: ["deleted", "sold"],
+          },
+        },
+      });
+      const totalPages = Math.ceil(total / limit);
       const products = await prisma.product.findMany({
         orderBy: {
           id: "desc",
@@ -44,8 +56,15 @@ const ProductController = {
             notIn: ["deleted", "sold"],
           },
         },
+        skip: skip,
+        take: limit,
       });
-      res.json(products);
+      res.json({
+        products,
+        totalPages,
+        page,
+        total,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Failed to fetch products" });
@@ -94,6 +113,21 @@ const ProductController = {
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Failed to delete product" });
+    }
+  },
+  exportToExcel: async (req, res) => {
+    try {
+      const data = req.body.products;
+
+      const filename = `products.xlsx`;
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
+      XLSX.writeFile(workbook, "./upload/" + filename);
+      res.json({ filename: filename });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to export products" });
     }
   },
 };
